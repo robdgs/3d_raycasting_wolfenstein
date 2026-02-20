@@ -25,7 +25,7 @@ MLX_LIB  := $(MLX_DIR)/libmlx.a
 all: $(MLX_LIB) $(NAME)
 
 $(MLX_LIB):
-	@$(MAKE) -C $(MLX_DIR) --quiet
+	@$(MAKE) -C $(MLX_DIR) 2>/dev/null 1>/dev/null
 
 $(NAME): $(OBJS)
 	@$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
