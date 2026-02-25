@@ -6,14 +6,14 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 21:49:50 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/20 21:53:04 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/25 12:03:13 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include "../include/cub3d.h"
 
-void	free_scene(t_scene *sc)
+void	ft_free_scene(t_scene *sc)
 {
 	int	i;
 
@@ -41,7 +41,7 @@ void	free_scene(t_scene *sc)
 	}
 }
 
-static void	free_mlx(t_game *g)
+static void	ft_free_mlx(t_game *g)
 {
 	int	i;
 
@@ -73,9 +73,9 @@ static void	free_mlx(t_game *g)
 	}
 }
 
-void	cleanup_and_exit(t_game *g, int code)
+void	ft_cleanup_and_exit(t_game *g, int code)
 {
-	free_mlx(g);
-	free_scene(&g->scene);
+	ft_free_mlx(g);
+	ft_free_scene(&g->scene);
 	exit(code);
 }

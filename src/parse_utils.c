@@ -6,14 +6,14 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 21:50:52 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/20 21:55:45 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/25 12:52:47 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include "../include/cub3d.h"
 
-char	*gnl(int fd)
+char	*ft_gnl(int fd)
 {
 	static char	buf[GNL_BUFSIZE + 1];
 	char		rbuf[GNL_BUFSIZE + 1];
@@ -36,7 +36,7 @@ char	*gnl(int fd)
 			return (line);
 		}
 		rbuf[n] = '\0';
-		used = strlen(buf);
+		used = ft_strlen(buf);
 		copy_n = (size_t)n < GNL_BUFSIZE - used ? (size_t)n : GNL_BUFSIZE - used;
 		memcpy(buf + used, rbuf, copy_n);
 		buf[used + copy_n] = '\0';
@@ -48,11 +48,11 @@ char	*gnl(int fd)
 		return (NULL);
 	memcpy(line, buf, used);
 	line[used] = '\0';
-	memmove(buf, nl + 1, strlen(nl + 1) + 1);
+	memmove(buf, nl + 1, ft_strlen(nl + 1) + 1);
 	return (line);
 }
 
-int	count_chars(const char *s, char c)
+int	ft_count_chars(const char *s, char c)
 {
 	int	cnt;
 
@@ -66,7 +66,7 @@ int	count_chars(const char *s, char c)
 	return (cnt);
 }
 
-int	str_only_whitespace(const char *s)
+int	ft_str_only_whitespace(const char *s)
 {
 	while (*s)
 	{
@@ -77,13 +77,13 @@ int	str_only_whitespace(const char *s)
 	return (1);
 }
 
-char	*trim_newline(char *s)
+char	*ft_trim_newline(char *s)
 {
 	size_t	len;
 
 	if (!s)
 		return (NULL);
-	len = strlen(s);
+	len = ft_strlen(s);
 	while (len > 0 && (s[len - 1] == '\n' || s[len - 1] == '\r'))
 	{
 		s[len - 1] = '\0';
@@ -92,7 +92,7 @@ char	*trim_newline(char *s)
 	return (s);
 }
 
-void	free_strlist(t_strlist *lst)
+void	ft_free_strlist(t_strlist *lst)
 {
 	t_strlist	*tmp;
 
@@ -105,7 +105,7 @@ void	free_strlist(t_strlist *lst)
 	}
 }
 
-t_strlist	*strlist_append(t_strlist *lst, char *str)
+t_strlist	*ft_strlist_append(t_strlist *lst, char *str)
 {
 	t_strlist	*node;
 	t_strlist	*cur;
@@ -124,7 +124,7 @@ t_strlist	*strlist_append(t_strlist *lst, char *str)
 	return (lst);
 }
 
-int	list_count(t_strlist *lst)
+int	ft_list_count(t_strlist *lst)
 {
 	int	n;
 
@@ -137,7 +137,7 @@ int	list_count(t_strlist *lst)
 	return (n);
 }
 
-char	**strlist_to_array(t_strlist *lst, int count)
+char	**ft_strlist_to_array(t_strlist *lst, int count)
 {
 	char		**arr;
 	t_strlist	*cur;

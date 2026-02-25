@@ -6,7 +6,7 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 21:50:58 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/20 21:56:51 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/25 12:53:37 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,7 +192,7 @@ static void	cast_column(t_game *g, int x)
 	}
 }
 
-void	render_frame(t_game *g)
+void	ft_render_frame(t_game *g)
 {
 	int	x;
 

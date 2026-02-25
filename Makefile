@@ -1,4 +1,4 @@
-NAME    := cub3D
+NAME    := cub3d
 CC      := cc
 CFLAGS  := -Wall -Wextra -Werror -O2
 INC     := -I include -I minilibx-linux
@@ -15,7 +15,11 @@ SRCS := $(SRC_DIR)/main.c         \
         $(SRC_DIR)/init.c         \
         $(SRC_DIR)/render.c       \
         $(SRC_DIR)/events.c       \
-        $(SRC_DIR)/cleanup.c
+        $(SRC_DIR)/cleanup.c      \
+		$(SRC_DIR)/utils.c        \
+		$(SRC_DIR)/utils_two.c	  \
+		$(SRC_DIR)/events_two.c	  \
+		$(SRC_DIR)/parse_map_helpers.c
 
 OBJS := $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 

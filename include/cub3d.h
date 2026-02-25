@@ -6,7 +6,7 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 21:26:08 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/20 21:26:10 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/25 12:54:47 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,12 +82,12 @@ typedef struct s_tex
 /* ======================================================================== */
 typedef struct s_scene
 {
-	char	*tex_path[4];   /* NO SO EA WE */
+	char	*tex_path[4];
 	int		floor_rgb[3];
 	int		ceil_rgb[3];
-	char	**grid;         /* raw map grid (null-terminated array of rows)  */
+	char	**grid;
 	int		grid_rows;
-	int		grid_cols;      /* width of the widest row (padded with spaces)  */
+	int		grid_cols;
 }	t_scene;
 
 /* ======================================================================== */
@@ -143,41 +143,57 @@ typedef struct s_game
 }	t_game;
 
 /* ---- src/parse_utils.c ------------------------------------------------ */
-int			count_chars(const char *s, char c);
-int			str_only_whitespace(const char *s);
-char		*trim_newline(char *s);
-char		*gnl(int fd);
-void		free_strlist(t_strlist *lst);
-t_strlist	*strlist_append(t_strlist *lst, char *str);
-char		**strlist_to_array(t_strlist *lst, int count);
-int			list_count(t_strlist *lst);
+int			ft_count_chars(const char *s, char c);
+int			ft_str_only_whitespace(const char *s);
+char		*ft_trim_newline(char *s);
+char		*ft_gnl(int fd);
+void		ft_free_strlist(t_strlist *lst);
+t_strlist	*ft_strlist_append(t_strlist *lst, char *str);
+char		**ft_strlist_to_array(t_strlist *lst, int count);
+int			ft_list_count(t_strlist *lst);
 
 /* ---- src/parse_scene.c ------------------------------------------------ */
-int			parse_scene(t_game *g, const char *path);
+int			ft_parse_scene(t_game *g, const char *path);
 
-/* ---- src/parse_map.c -------------------------------------------------- */
-int			parse_map(t_game *g, t_strlist *map_lines);
-int			validate_map(t_game *g);
+/* ---- src/parse_map -------------------------------------------------- */
+int			ft_parse_map(t_game *g, t_strlist *map_lines);
+int			ft_validate_map(t_game *g);
+void		ft_stfind(char **wrk, t_scene *sc, int *strt, int *sr, int *sc_col);
+int			ft_check_chars(t_scene *sc, char **work);
+void		ft_copy_padded_row(char *dst, char *src, int cols);
+char		**ft_alloc_grid_rows(int rows, int cols);
+char		**ft_pad_grid(char **src, int rows, int cols);
 
 /* ---- src/init.c ------------------------------------------------------- */
-int			init_mlx(t_game *g);
-int			load_textures(t_game *g);
-void		setup_player(t_game *g);
+int			ft_init_mlx(t_game *g);
+int			ft_load_textures(t_game *g);
+void		ft_setup_player(t_game *g);
 
 /* ---- src/render.c ----------------------------------------------------- */
-void		render_frame(t_game *g);
+void		ft_render_frame(t_game *g);
 
 /* ---- src/events.c ----------------------------------------------------- */
-int			on_keydown(int key, t_game *g);
-int			on_keyup(int key, t_game *g);
-int			on_close(t_game *g);
-int			game_loop(t_game *g);
+int			ft_on_keydown(int key, t_game *g);
+int			ft_on_keyup(int key, t_game *g);
+int			ft_on_close(t_game *g);
+int			ft_game_loop(t_game *g);
 
 /* ---- src/cleanup.c ---------------------------------------------------- */
-void		cleanup_and_exit(t_game *g, int code);
-void		free_scene(t_scene *sc);
+void		ft_cleanup_and_exit(t_game *g, int code);
+void		ft_free_scene(t_scene *sc);
 
 /* ---- src/error.c ------------------------------------------------------ */
-int			err(const char *msg);
+int			ft_err(const char *msg);
+
+/* ---- src/utils ------------------------------------------------------ */
+size_t		ft_strlen(const char *str);
+int			ft_strcmp(const char *s1, const char *s2);
+int			ft_strncmp(const char *s1, const char *s2, size_t n);
+void		*ft_memset(void *s, int c, size_t n);
+void		*ft_memcpy(void *dest, const void *src, size_t n);
+int			ft_flood(char **grid, int rows, int cols, int r, int c);
+void		ft_free_grid(char **grid);
+int			ft_is_start(char ch);
+int			ft_is_tile(char ch);
 
 #endif
