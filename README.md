@@ -8,16 +8,22 @@ A minimal first-person raycaster in C, inspired by Wolfenstein 3D, built for the
 
 | File | Responsibility |
 |------|---------------|
-| `src/main.c` | Entry point, argument validation, mlx hooks |
-| `src/parse_utils.c` | Inline GNL, string helpers, linked-list helpers |
+| `src/main.c` | Entry point, argument validation, mlx hooks setup |
+| `src/parse_utils.c` | Custom GNL (`ft_gnl`), string helpers, linked-list utilities |
 | `src/parse_scene.c` | `.cub` file parser (textures, colors, dispatches to map parser) |
-| `src/parse_map.c` | Map grid builder, padded-grid construction, flood-fill validation |
-| `src/init.c` | mlx window/image setup, XPM texture loading, player initialisation |
+| `src/parse_map.c` | Map grid builder, validation orchestration |
+| `src/parse_map_helpers.c` | Grid padding, character validation, player position finder |
+| `src/init.c` | mlx window/image setup, XPM texture loading, player initialization |
 | `src/render.c` | DDA raycaster, textured wall columns, ceiling/floor fill |
-| `src/events.c` | Key-press/release handlers, movement, rotation, game loop |
+| `src/events.c` | Movement, rotation logic, game loop |
+| `src/events_two.c` | Key-press/release handlers, window close handler |
+| `src/utils.c` | String utilities (`ft_strlen`, `ft_strcmp`, `ft_strncmp`, `ft_memset`, `ft_memcpy`) |
+| `src/utils_two.c` | Map utilities (`ft_flood`, `ft_free_grid`, `ft_is_start`, `ft_is_tile`) |
 | `src/cleanup.c` | Resource teardown and exit |
-| `src/error.c` | Uniform error printer |
-| `include/cub3d.h` | All structs, constants, prototypes |
+| `src/error.c` | Uniform error printer (`ft_err`) |
+| `include/cub3d.h` | All structs, constants, function prototypes |
+
+**Note:** All functions use the `ft_` prefix convention for consistency.
 
 ---
 
