@@ -6,32 +6,33 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 21:50:13 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/25 12:41:44 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/25 13:17:10 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include "../include/cub3d.h"
 
+static void	ft_rotate_vec(double *x, double *y, double cos_a, double sin_a)
+{
+	double	old_x;
+	double	old_y;
+
+	old_x = *x;
+	old_y = *y;
+	*x = old_x * cos_a - old_y * sin_a;
+	*y = old_x * sin_a + old_y * cos_a;
+}
+
 static void	ft_rotate(t_player *pl, double angle)
 {
 	double	cos_a;
 	double	sin_a;
-	double	old_dx;
-	double	old_dy;
-	double	old_px;
-	double	old_py;
 
 	cos_a = cos(angle);
 	sin_a = sin(angle);
-	old_dx = pl->dir_x;
-	old_dy = pl->dir_y;
-	old_px = pl->plane_x;
-	old_py = pl->plane_y;
-	pl->dir_x   = old_dx * cos_a - old_dy * sin_a;
-	pl->dir_y   = old_dx * sin_a + old_dy * cos_a;
-	pl->plane_x = old_px * cos_a - old_py * sin_a;
-	pl->plane_y = old_px * sin_a + old_py * cos_a;
+	ft_rotate_vec(&pl->dir_x, &pl->dir_y, cos_a, sin_a);
+	ft_rotate_vec(&pl->plane_x, &pl->plane_y, cos_a, sin_a);
 }
 
 static void	ft_try_move(t_game *g, double dx, double dy)

@@ -6,34 +6,38 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 21:50:31 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/25 12:41:22 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/25 13:17:10 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include "../include/cub3d.h"
 
-int	ft_validate_map(t_game *g)
+static int	ft_check_map_chars(t_game *g, char **work, int *starts)
 {
-	t_scene	*sc;
-	char	**work;
-	int		starts;
-	int		sr;
-	int		sc_col;
-	int		res;
+	int	sr;
+	int	sc_col;
 
-	sc = &g->scene;
-	work = ft_pad_grid(sc->grid, sc->grid_rows, sc->grid_cols);
-	if (!work)
-		return (ft_err("malloc failed during map validation"));
-	ft_stfind(work, sc, &starts, &sr, &sc_col);
-	if (ft_check_chars(sc, work) || starts != 1)
+	ft_stfind(work, &g->scene, starts, &sr, &sc_col);
+	if (ft_check_chars(&g->scene, work) || *starts != 1)
 	{
-		if (starts != 1)
+		if (*starts != 1)
 			ft_err("map must have exactly one player start position");
 		return (1);
 	}
-	res = ft_flood(work, sc->grid_rows, sc->grid_cols, sr, sc_col);
+	return (ft_flood(work, g->scene.grid_rows, g->scene.grid_cols, sr, sc_col));
+}
+
+int	ft_validate_map(t_game *g)
+{
+	char	**work;
+	int		starts;
+	int		res;
+
+	work = ft_pad_grid(g->scene.grid, g->scene.grid_rows, g->scene.grid_cols);
+	if (!work)
+		return (ft_err("malloc failed during map validation"));
+	res = ft_check_map_chars(g, work, &starts);
 	ft_free_grid(work);
 	if (res)
 		return (ft_err("map is not enclosed by walls"));

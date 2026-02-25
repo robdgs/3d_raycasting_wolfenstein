@@ -6,7 +6,7 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 21:26:08 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/25 12:54:47 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/25 13:10:28 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,5 +195,6 @@ int			ft_flood(char **grid, int rows, int cols, int r, int c);
 void		ft_free_grid(char **grid);
 int			ft_is_start(char ch);
 int			ft_is_tile(char ch);
+char		*ft_strchr(const char *s, int c);
 
 #endif

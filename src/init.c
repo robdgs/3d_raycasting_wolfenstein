@@ -6,23 +6,51 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 21:50:42 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/25 12:42:37 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/25 13:17:10 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include "../include/cub3d.h"
 
-void	ft_setup_player(t_game *g)
+static void	ft_set_dir(t_player *pl, char ch)
 {
-	t_scene		*sc;
-	t_player	*pl;
-	int			r;
-	int			c;
-	char		ch;
+	if (ch == 'N')
+	{
+		pl->dir_x = 0;
+		pl->dir_y = -1;
+		pl->plane_x = 0.66;
+		pl->plane_y = 0;
+	}
+	else if (ch == 'S')
+	{
+		pl->dir_x = 0;
+		pl->dir_y = 1;
+		pl->plane_x = -0.66;
+		pl->plane_y = 0;
+	}
+	else if (ch == 'E')
+	{
+		pl->dir_x = 1;
+		pl->dir_y = 0;
+		pl->plane_x = 0;
+		pl->plane_y = 0.66;
+	}
+	else
+	{
+		pl->dir_x = -1;
+		pl->dir_y = 0;
+		pl->plane_x = 0;
+		pl->plane_y = -0.66;
+	}
+}
 
-	sc = &g->scene;
-	pl = &g->player;
+static int	ft_find_start(t_scene *sc, t_player *pl)
+{
+	int		r;
+	int		c;
+	char	ch;
+
 	r = 0;
 	while (r < sc->grid_rows)
 	{
@@ -34,33 +62,20 @@ void	ft_setup_player(t_game *g)
 			{
 				pl->px = c + 0.5;
 				pl->py = r + 0.5;
-				if (ch == 'N')
-				{
-					pl->dir_x = 0;  pl->dir_y = -1;
-					pl->plane_x = 0.66; pl->plane_y = 0;
-				}
-				else if (ch == 'S')
-				{
-					pl->dir_x = 0;  pl->dir_y = 1;
-					pl->plane_x = -0.66; pl->plane_y = 0;
-				}
-				else if (ch == 'E')
-				{
-					pl->dir_x = 1;  pl->dir_y = 0;
-					pl->plane_x = 0; pl->plane_y = 0.66;
-				}
-				else /* W */
-				{
-					pl->dir_x = -1; pl->dir_y = 0;
-					pl->plane_x = 0; pl->plane_y = -0.66;
-				}
+				ft_set_dir(pl, ch);
 				sc->grid[r][c] = '0';
-				return ;
+				return (1);
 			}
 			c++;
 		}
 		r++;
 	}
+	return (0);
+}
+
+void	ft_setup_player(t_game *g)
+{
+	ft_find_start(&g->scene, &g->player);
 }
 
 int	ft_init_mlx(t_game *g)

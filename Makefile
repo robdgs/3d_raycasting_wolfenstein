@@ -19,7 +19,8 @@ SRCS := $(SRC_DIR)/main.c         \
 		$(SRC_DIR)/utils.c        \
 		$(SRC_DIR)/utils_two.c	  \
 		$(SRC_DIR)/events_two.c	  \
-		$(SRC_DIR)/parse_map_helpers.c
+		$(SRC_DIR)/parse_map_helpers.c \
+		$(SRC_DIR)/utils_three.c
 
 OBJS := $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
