@@ -1,8 +1,21 @@
-# cub3D — Mandatory Part
+# cub3D
 
-A minimal first-person raycaster in C, inspired by Wolfenstein 3D, built for the 42 school curriculum.
+A minimalistic first-person 3D raycaster in C, inspired by Wolfenstein 3D, built for the 42 school curriculum.
 
-**Code Quality:** All functions strictly adhere to norminette limits (≤25 lines, ≤5 parameters, ≤5 variables per function).
+This project implements a real-time raycasting engine using the MiniLibX graphics library. Navigate through textured mazes with smooth movement and rotation controls.
+
+**Code Quality:** All functions strictly adhere to norminette standards (≤25 lines, ≤5 parameters, ≤5 variables per function).
+
+---
+
+## Features
+
+- ⚡ **Real-time raycasting** - DDA algorithm for efficient wall detection
+- 🎨 **Textured walls** - Different textures for each cardinal direction
+- 🎮 **Smooth controls** - WASD movement with arrow key rotation
+- 🗺️ **Scene parser** - Custom `.cub` file format with validation
+- 🔍 **Map validation** - Ensures closed boundaries and valid player position
+- 🎯 **Norminette compliant** - Clean, modular, readable code
 
 ---
 
@@ -37,41 +50,94 @@ A minimal first-person raycaster in C, inspired by Wolfenstein 3D, built for the
 
 ---
 
-## Building
+## Building & Running
 
-The project requires the [minilibx-linux](https://github.com/42Paris/minilibx-linux)
-library.  Download it and place it in a `minilibx-linux/` directory 
-# get minilibx-linux
+### Prerequisites
+
+- GCC compiler
+- Make
+- X11 development libraries (on Linux)
+- [MiniLibX for Linux](https://github.com/42Paris/minilibx-linux)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone <repository-url> cub3d
+cd cub3d
+
+# Get MiniLibX (if not already present)
 git clone https://github.com/42Paris/minilibx-linux.git
 
-# build
+# Build the project
 make
 
-# run
-./cub3D maps/valid/test.cub
+# Run with a map file
+./cub3d maps/valid/test.cub
 ```
+
+### Make Commands
+
+| Command | Description |
+|---------|-------------|
+| `make` | Compile the project |
+| `make clean` | Remove object files |
+| `make fclean` | Remove object files and executable |
+| `make re` | Recompile the project from scratch |
 
 ---
 
-## .cub scene file format
+## Scene File Format (.cub)
+
+Scene files define the textures, colors, and map layout for the game.
+
+### Format Specification
 
 ```
-NO ./path/to/north.xpm
-SO ./path/to/south.xpm
-EA ./path/to/east.xpm
-WE ./path/to/west.xpm
+NO ./textures/north.xpm
+SO ./textures/south.xpm
+EA ./textures/east.xpm
+WE ./textures/west.xpm
 
-F R,G,B         # floor colour  (0-255 each)
-C R,G,B         # ceiling colour
+F 134,136,151
+C 24,30,59
 
-111111
-100N01
-100001
-111111
+111111111111111
+100000000000001
+10000N000000001
+100000000000001
+111101111110001
+100000000000001
+100000000000001
+111111111111111
 ```
 
-Map tiles: `1` = wall, `0` = empty space, `N/S/E/W` = player start.
-The map must be the last element in the file and fully enclosed by walls.
+### Elements
+
+| Element | Description |
+|---------|-------------|
+| `NO` | Path to north wall texture (XPM format) |
+| `SO` | Path to south wall texture (XPM format) |
+| `EA` | Path to east wall texture (XPM format) |
+| `WE` | Path to west wall texture (XPM format) |
+| `F` | Floor color in RGB format (0-255 each) |
+| `C` | Ceiling color in RGB format (0-255 each) |
+
+### Map Rules
+
+- **Tiles:**
+  - `1` = Wall
+  - `0` = Empty walkable space
+  - `N/S/E/W` = Player starting position and direction
+- **Requirements:**
+  - Map must be enclosed by walls (1's)
+  - Must contain exactly one player start position
+  - Map must be the last element in the file
+  - Invalid maps will be rejected with error messages
+
+### Example Maps
+
+Valid maps are provided in `maps/valid/`, and invalid test cases in `maps/invalid/`.
 
 ---
 
@@ -89,12 +155,93 @@ The map must be the last element in the file and fully enclosed by walls.
 
 ## Texture layout
 
-Place four 64×64 (or any power-of-two) XPM textures and reference them in the scene file:
+Place four 64×64 (or any power-of-two) XPM textures and reference them in the scene file.
+
+The textures directory structure:
 
 ```
 textures/
-  north.xpm
-  south.xpm
-  east.xpm
-  west.xpm
+  north.xpm   # North-facing wall texture
+  south.xpm   # South-facing wall texture
+  east.xpm    # East-facing wall texture
+  west.xpm    # West-facing wall texture
 ```
+
+---
+
+## Technical Details
+
+### Raycasting Algorithm
+
+This project uses the **DDA (Digital Differential Analysis)** algorithm for raycasting:
+
+1. For each screen column, cast a ray from the player's position
+2. Step through the grid until hitting a wall
+3. Calculate perpendicular wall distance (to avoid fisheye effect)
+4. Determine wall height based on distance
+5. Map texture coordinates and render the vertical slice
+
+**Field of View:** 66° (plane magnitude of 0.66)
+
+For a detailed explanation of the raycasting implementation, see [RAYCASTING_EXPLANATION.txt](RAYCASTING_EXPLANATION.txt).
+
+### Code Organization
+
+The codebase is organized following strict norminette guidelines:
+
+- **Helper Structures:** Local structs (`t_ray`, `t_dda`, `t_wall`) in the render pipeline organize related data
+- **Function Decomposition:** Complex logic split into focused, reusable functions
+- **DRY Principle:** No code duplication; shared logic extracted into utilities
+- **Clear Separation:** Parsing, rendering, events, and utilities in separate modules
+
+### Memory Management
+
+- All dynamically allocated memory is properly freed
+- Textures and MLX resources are cleaned up on exit
+- Comprehensive error handling with cleanup on failure
+
+---
+
+## Project Structure
+
+```
+cub3d/
+├── include/
+│   └── cub3d.h              # Structures, constants, function prototypes
+├── src/
+│   ├── main.c               # Entry point and initialization
+│   ├── parse_scene.c        # Scene file parser
+│   ├── parse_map.c          # Map grid builder and validation
+│   ├── parse_map_helpers.c  # Grid utilities and character validation
+│   ├── parse_texture.c      # Texture path parsing
+│   ├── parse_color.c        # RGB color parsing
+│   ├── parse_utils*.c       # Parsing utilities (GNL, string helpers)
+│   ├── init.c               # MLX initialization
+│   ├── init_mlx.c           # Window and texture setup
+│   ├── render*.c            # Raycasting and rendering pipeline
+│   ├── events*.c            # Keyboard and window events
+│   ├── utils*.c             # General utilities
+│   ├── cleanup.c            # Resource cleanup
+│   └── error.c              # Error handling
+├── maps/
+│   ├── valid/               # Valid test maps
+│   └── invalid/             # Invalid maps for testing
+├── textures/                # Wall texture files (XPM)
+├── minilibx-linux/          # Graphics library
+├── Makefile
+└── README.md
+```
+
+---
+
+## Resources & References
+
+- [Lode's Raycasting Tutorial](https://lodev.org/cgtutor/raycasting.html) - Comprehensive raycasting guide
+- [MiniLibX Documentation](https://harm-smits.github.io/42docs/libs/minilibx) - MLX library reference
+- [Wolfenstein 3D](https://en.wikipedia.org/wiki/Wolfenstein_3D) - The game that inspired this project
+
+---
+
+## License
+
+This project is part of the 42 school curriculum.
