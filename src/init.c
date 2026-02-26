@@ -6,42 +6,25 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 21:50:42 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/25 13:17:10 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/26 18:17:01 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 #include "../include/cub3d.h"
 
 static void	ft_set_dir(t_player *pl, char ch)
 {
-	if (ch == 'N')
+	pl->dir_x = (ch == 'E') - (ch == 'W');
+	pl->dir_y = (ch == 'S') - (ch == 'N');
+	if (ch == 'N' || ch == 'S')
 	{
-		pl->dir_x = 0;
-		pl->dir_y = -1;
-		pl->plane_x = 0.66;
+		pl->plane_x = (ch == 'N') * 0.66 - (ch == 'S') * 0.66;
 		pl->plane_y = 0;
-	}
-	else if (ch == 'S')
-	{
-		pl->dir_x = 0;
-		pl->dir_y = 1;
-		pl->plane_x = -0.66;
-		pl->plane_y = 0;
-	}
-	else if (ch == 'E')
-	{
-		pl->dir_x = 1;
-		pl->dir_y = 0;
-		pl->plane_x = 0;
-		pl->plane_y = 0.66;
 	}
 	else
 	{
-		pl->dir_x = -1;
-		pl->dir_y = 0;
 		pl->plane_x = 0;
-		pl->plane_y = -0.66;
+		pl->plane_y = (ch == 'E') * 0.66 - (ch == 'W') * 0.66;
 	}
 }
 
@@ -76,26 +59,6 @@ static int	ft_find_start(t_scene *sc, t_player *pl)
 void	ft_setup_player(t_game *g)
 {
 	ft_find_start(&g->scene, &g->player);
-}
-
-int	ft_init_mlx(t_game *g)
-{
-	t_mlx	*m;
-
-	m = &g->mlx;
-	m->conn = mlx_init();
-	if (!m->conn)
-		return (ft_err("mlx_init failed"));
-	m->win = mlx_new_window(m->conn, WIN_W, WIN_H, WIN_TITLE);
-	if (!m->win)
-		return (ft_err("mlx_new_window failed"));
-	m->img = mlx_new_image(m->conn, WIN_W, WIN_H);
-	if (!m->img)
-		return (ft_err("mlx_new_image failed"));
-	m->buf = mlx_get_data_addr(m->img, &m->bpp, &m->stride, &m->endian);
-	if (!m->buf)
-		return (ft_err("mlx_get_data_addr failed"));
-	return (0);
 }
 
 static int	ft_load_one_tex(t_game *g, t_tex *tex, const char *path)

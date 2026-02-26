@@ -6,7 +6,7 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 12:07:05 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/25 12:27:49 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/26 18:06:19 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,12 +35,12 @@ int	ft_check_chars(t_scene *sc, char **work)
 	return (0);
 }
 
-void	ft_stfind(char **wrk, t_scene *sc, int *strts, int *sr, int *sc_col)
+void	ft_stfind(char **wrk, t_scene *sc, t_start_info *info)
 {
 	int	r;
 	int	c;
 
-	*strts = 0;
+	info->count = 0;
 	r = 0;
 	while (r < sc->grid_rows)
 	{
@@ -49,9 +49,9 @@ void	ft_stfind(char **wrk, t_scene *sc, int *strts, int *sr, int *sc_col)
 		{
 			if (ft_is_start(wrk[r][c]))
 			{
-				(*strts)++;
-				*sr = r;
-				*sc_col = c;
+				(info->count)++;
+				info->row = r;
+				info->col = c;
 				wrk[r][c] = '0';
 			}
 			c++;

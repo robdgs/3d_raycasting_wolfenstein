@@ -6,10 +6,9 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 21:50:13 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/25 13:17:10 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/26 18:29:59 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 #include "../include/cub3d.h"
 
@@ -35,24 +34,39 @@ static void	ft_rotate(t_player *pl, double angle)
 	ft_rotate_vec(&pl->plane_x, &pl->plane_y, cos_a, sin_a);
 }
 
+static int	ft_check_collision(t_scene *sc, double x, double y)
+{
+	double	margin;
+
+	margin = 0.2;
+	if (ft_is_wall(sc, x - margin, y - margin))
+		return (1);
+	if (ft_is_wall(sc, x + margin, y - margin))
+		return (1);
+	if (ft_is_wall(sc, x - margin, y + margin))
+		return (1);
+	if (ft_is_wall(sc, x + margin, y + margin))
+		return (1);
+	return (0);
+}
+
 static void	ft_try_move(t_game *g, double dx, double dy)
 {
 	t_player	*pl;
-	t_scene		*sc;
 	double		nx;
 	double		ny;
 
 	pl = &g->player;
-	sc = &g->scene;
 	nx = pl->px + dx;
 	ny = pl->py + dy;
-	if ((int)nx >= 0 && (int)nx < sc->grid_cols
-		&& (int)pl->py >= 0 && (int)pl->py < sc->grid_rows
-		&& sc->grid[(int)pl->py][(int)nx] != '1')
+	if (!ft_check_collision(&g->scene, nx, ny))
+	{
 		pl->px = nx;
-	if ((int)pl->px >= 0 && (int)pl->px < sc->grid_cols
-		&& (int)ny >= 0 && (int)ny < sc->grid_rows
-		&& sc->grid[(int)ny][(int)pl->px] != '1')
+		pl->py = ny;
+	}
+	else if (!ft_check_collision(&g->scene, nx, pl->py))
+		pl->px = nx;
+	else if (!ft_check_collision(&g->scene, pl->px, ny))
 		pl->py = ny;
 }
 

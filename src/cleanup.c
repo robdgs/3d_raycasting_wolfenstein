@@ -6,10 +6,9 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 21:49:50 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/25 12:03:13 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/26 18:32:21 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 #include "../include/cub3d.h"
 
@@ -41,7 +40,7 @@ void	ft_free_scene(t_scene *sc)
 	}
 }
 
-static void	ft_free_mlx(t_game *g)
+static void	ft_free_textures(t_game *g)
 {
 	int	i;
 
@@ -55,6 +54,11 @@ static void	ft_free_mlx(t_game *g)
 		}
 		i++;
 	}
+}
+
+static void	ft_free_mlx(t_game *g)
+{
+	ft_free_textures(g);
 	if (g->mlx.img)
 	{
 		mlx_destroy_image(g->mlx.conn, g->mlx.img);

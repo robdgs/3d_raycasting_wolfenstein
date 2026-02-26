@@ -6,7 +6,7 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 11:57:32 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/25 12:46:08 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/26 18:13:24 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,19 +22,18 @@ size_t	ft_strlen(const char *str)
 	return (i);
 }
 
-
 int	ft_strcmp(const char *s1, const char *s2)
 {
-    size_t	i;
+	size_t	i;
 
-    i = 0;
-    while (s1[i] || s2[i])
-    {
-        if (s1[i] != s2[i])
-            return (((unsigned char)s1[i] - (unsigned char)s2[i]));
-        i++;
-    }
-    return (0);
+	i = 0;
+	while (s1[i] || s2[i])
+	{
+		if (s1[i] != s2[i])
+			return (((unsigned char)s1[i] - (unsigned char)s2[i]));
+		i++;
+	}
+	return (0);
 }
 
 void	*ft_memset(void *s, int c, size_t n)

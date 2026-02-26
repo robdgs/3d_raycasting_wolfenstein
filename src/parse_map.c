@@ -6,26 +6,29 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 21:50:31 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/25 13:17:10 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/26 18:17:26 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 #include "../include/cub3d.h"
 
 static int	ft_check_map_chars(t_game *g, char **work, int *starts)
 {
-	int	sr;
-	int	sc_col;
+	t_start_info	info;
+	t_grid			grid;
 
-	ft_stfind(work, &g->scene, starts, &sr, &sc_col);
+	ft_stfind(work, &g->scene, &info);
+	*starts = info.count;
 	if (ft_check_chars(&g->scene, work) || *starts != 1)
 	{
 		if (*starts != 1)
 			ft_err("map must have exactly one player start position");
 		return (1);
 	}
-	return (ft_flood(work, g->scene.grid_rows, g->scene.grid_cols, sr, sc_col));
+	grid.data = work;
+	grid.rows = g->scene.grid_rows;
+	grid.cols = g->scene.grid_cols;
+	return (ft_flood(&grid, info.row, info.col));
 }
 
 int	ft_validate_map(t_game *g)

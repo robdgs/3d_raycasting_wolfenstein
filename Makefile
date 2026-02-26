@@ -10,17 +10,28 @@ OBJ_DIR := obj
 SRCS := $(SRC_DIR)/main.c         \
         $(SRC_DIR)/error.c        \
         $(SRC_DIR)/parse_utils.c  \
+        $(SRC_DIR)/parse_utils_two.c \
+        $(SRC_DIR)/parse_utils_three.c \
         $(SRC_DIR)/parse_scene.c  \
+        $(SRC_DIR)/parse_texture.c \
+        $(SRC_DIR)/parse_color.c  \
+        $(SRC_DIR)/parse_scene_utils.c \
         $(SRC_DIR)/parse_map.c    \
         $(SRC_DIR)/init.c         \
         $(SRC_DIR)/render.c       \
+        $(SRC_DIR)/render_pixel.c \
+        $(SRC_DIR)/render_texture.c \
+        $(SRC_DIR)/render_ray.c   \
+        $(SRC_DIR)/render_wall.c  \
         $(SRC_DIR)/events.c       \
         $(SRC_DIR)/cleanup.c      \
 		$(SRC_DIR)/utils.c        \
 		$(SRC_DIR)/utils_two.c	  \
 		$(SRC_DIR)/events_two.c	  \
 		$(SRC_DIR)/parse_map_helpers.c \
-		$(SRC_DIR)/utils_three.c
+		$(SRC_DIR)/utils_three.c  \
+		$(SRC_DIR)/init_mlx.c     \
+
 
 OBJS := $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 

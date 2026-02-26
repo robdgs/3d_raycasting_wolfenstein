@@ -6,25 +6,25 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/25 12:15:37 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/25 12:55:30 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/26 18:11:35 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/cub3d.h"
 
-int	ft_flood(char **grid, int rows, int cols, int r, int c)
+int	ft_flood(t_grid *grid, int r, int c)
 {
-	if (r < 0 || r >= rows || c < 0 || c >= cols)
+	if (r < 0 || r >= grid->rows || c < 0 || c >= grid->cols)
 		return (1);
-	if (grid[r][c] == '1' || grid[r][c] == 'V')
+	if (grid->data[r][c] == '1' || grid->data[r][c] == 'V')
 		return (0);
-	if (grid[r][c] == ' ')
+	if (grid->data[r][c] == ' ')
 		return (1);
-	grid[r][c] = 'V';
-	return (ft_flood(grid, rows, cols, r - 1, c)
-		|| ft_flood(grid, rows, cols, r + 1, c)
-		|| ft_flood(grid, rows, cols, r, c - 1)
-		|| ft_flood(grid, rows, cols, r, c + 1));
+	grid->data[r][c] = 'V';
+	return (ft_flood(grid, r - 1, c)
+		|| ft_flood(grid, r + 1, c)
+		|| ft_flood(grid, r, c - 1)
+		|| ft_flood(grid, r, c + 1));
 }
 
 void	ft_free_grid(char **grid)

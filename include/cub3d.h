@@ -6,7 +6,7 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 21:26:08 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/25 13:10:28 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/02/26 18:33:00 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@
 # include <fcntl.h>
 # include <unistd.h>
 # include <stdbool.h>
-
 # include "../minilibx-linux/mlx.h"
 
 /* ---- Window / render config -------------------------------------------- */
@@ -91,6 +90,26 @@ typedef struct s_scene
 }	t_scene;
 
 /* ======================================================================== */
+/*  Start position info (output from ft_stfind)                              */
+/* ======================================================================== */
+typedef struct s_start_info
+{
+	int	count;
+	int	row;
+	int	col;
+}	t_start_info;
+
+/* ======================================================================== */
+/*  Grid wrapper for flood fill validation                                   */
+/* ======================================================================== */
+typedef struct s_grid
+{
+	char	**data;
+	int		rows;
+	int		cols;
+}	t_grid;
+
+/* ======================================================================== */
 /*  Player state                                                              */
 /* ======================================================================== */
 typedef struct s_player
@@ -142,15 +161,72 @@ typedef struct s_game
 	t_tex		textures[4];
 }	t_game;
 
+/* ======================================================================== */
+/*  Internal render structures                                               */
+/* ======================================================================== */
+
+typedef struct s_ray
+{
+	double	dx;
+	double	dy;
+}	t_ray;
+
+typedef struct s_dda
+{
+	int		map_x;
+	int		map_y;
+	double	delta_x;
+	double	delta_y;
+	double	side_x;
+	double	side_y;
+	int		step_x;
+	int		step_y;
+	int		side;
+}	t_dda;
+
+typedef struct s_wall
+{
+	double	perp_dist;
+	int		line_h;
+	int		draw_top;
+	int		draw_bot;
+	int		tex_x;
+}	t_wall;
+
+typedef struct s_ray_calc
+{
+	t_dda		*dda;
+	t_ray		*ray;
+	t_player	*pl;
+}	t_ray_calc;
+
 /* ---- src/parse_utils.c ------------------------------------------------ */
-int			ft_count_chars(const char *s, char c);
-int			ft_str_only_whitespace(const char *s);
 char		*ft_trim_newline(char *s);
 char		*ft_gnl(int fd);
+
+/* ---- src/parse_utils_two.c -------------------------------------------- */
 void		ft_free_strlist(t_strlist *lst);
 t_strlist	*ft_strlist_append(t_strlist *lst, char *str);
 char		**ft_strlist_to_array(t_strlist *lst, int count);
 int			ft_list_count(t_strlist *lst);
+
+/* ---- src/parse_utils_three.c ------------------------------------------ */
+int			ft_count_chars(const char *s, char c);
+int			ft_str_only_whitespace(const char *s);
+
+/* ---- src/parse_texture.c ---------------------------------------------- */
+int			ft_is_xpm(const char *path);
+int			ft_parse_texture_line(t_scene *sc, int dir, const char *rest);
+
+/* ---- src/parse_color.c ------------------------------------------------ */
+int			ft_parse_one_component(const char **p, int *value);
+int			ft_parse_color_line(int *rgb, const char *rest);
+
+/* ---- src/parse_scene_utils.c ------------------------------------------ */
+int			ft_line_is_map_row(const char *s);
+int			ft_headers_complete(const t_scene *sc);
+int			ft_dispatch_header(t_scene *sc, const char *line);
+void		ft_init_scene_data(t_scene *sc);
 
 /* ---- src/parse_scene.c ------------------------------------------------ */
 int			ft_parse_scene(t_game *g, const char *path);
@@ -158,7 +234,7 @@ int			ft_parse_scene(t_game *g, const char *path);
 /* ---- src/parse_map -------------------------------------------------- */
 int			ft_parse_map(t_game *g, t_strlist *map_lines);
 int			ft_validate_map(t_game *g);
-void		ft_stfind(char **wrk, t_scene *sc, int *strt, int *sr, int *sc_col);
+void		ft_stfind(char **wrk, t_scene *sc, t_start_info *info);
 int			ft_check_chars(t_scene *sc, char **work);
 void		ft_copy_padded_row(char *dst, char *src, int cols);
 char		**ft_alloc_grid_rows(int rows, int cols);
@@ -177,6 +253,7 @@ int			ft_on_keydown(int key, t_game *g);
 int			ft_on_keyup(int key, t_game *g);
 int			ft_on_close(t_game *g);
 int			ft_game_loop(t_game *g);
+int			ft_is_wall(t_scene *sc, double x, double y);
 
 /* ---- src/cleanup.c ---------------------------------------------------- */
 void		ft_cleanup_and_exit(t_game *g, int code);
@@ -191,10 +268,30 @@ int			ft_strcmp(const char *s1, const char *s2);
 int			ft_strncmp(const char *s1, const char *s2, size_t n);
 void		*ft_memset(void *s, int c, size_t n);
 void		*ft_memcpy(void *dest, const void *src, size_t n);
-int			ft_flood(char **grid, int rows, int cols, int r, int c);
+int			ft_flood(t_grid *grid, int r, int c);
 void		ft_free_grid(char **grid);
 int			ft_is_start(char ch);
 int			ft_is_tile(char ch);
 char		*ft_strchr(const char *s, int c);
+
+/* ---- src/render_pixel.c ----------------------------------------------- */
+void		put_pixel(t_mlx *m, int x, int y, int color);
+int			rgb(int r, int g, int b);
+void		draw_background(t_game *g);
+
+/* ---- src/render_texture.c --------------------------------------------- */
+t_tex		*pick_texture(t_game *g, double ray_dx, double ray_dy, int side);
+int			sample_tex(t_tex *tex, int tx, int ty);
+
+/* ---- src/render_ray.c ------------------------------------------------- */
+void		init_ray(t_ray *ray, t_player *pl, int x);
+void		init_dda_deltas(t_dda *dda, t_ray *ray, t_player *pl);
+void		init_dda_steps(t_dda *dda, t_ray *ray, t_player *pl);
+void		perform_dda(t_dda *dda, t_scene *sc);
+
+/* ---- src/render_wall.c ------------------------------------------------ */
+void		calc_perp_dist(t_wall *wall, t_dda *dda, t_ray *ray, t_player *pl);
+void		calc_tex_x(t_wall *wall, t_ray_calc *rc, t_tex *tex);
+void		draw_wall_column(t_mlx *mlx, t_wall *wall, t_tex *tex, int x);
 
 #endif
