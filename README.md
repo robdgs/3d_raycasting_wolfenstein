@@ -207,29 +207,48 @@ The codebase is organized following strict norminette guidelines:
 ```
 cub3d/
 ├── include/
-│   └── cub3d.h              # Structures, constants, function prototypes
+│   └── cub3d.h                # Structures, constants, function prototypes
 ├── src/
-│   ├── main.c               # Entry point and initialization
-│   ├── parse_scene.c        # Scene file parser
-│   ├── parse_map.c          # Map grid builder and validation
-│   ├── parse_map_helpers.c  # Grid utilities and character validation
-│   ├── parse_texture.c      # Texture path parsing
-│   ├── parse_color.c        # RGB color parsing
-│   ├── parse_utils*.c       # Parsing utilities (GNL, string helpers)
-│   ├── init.c               # MLX initialization
-│   ├── init_mlx.c           # Window and texture setup
-│   ├── render*.c            # Raycasting and rendering pipeline
-│   ├── events*.c            # Keyboard and window events
-│   ├── utils*.c             # General utilities
-│   ├── cleanup.c            # Resource cleanup
-│   └── error.c              # Error handling
+│   ├── main.c                 # Entry point and initialization
+│   ├── parse_scene.c          # Scene file parser
+│   ├── parse_scene_utils.c    # Scene parsing helper functions
+│   ├── parse_map.c            # Map grid builder and validation
+│   ├── parse_map_helpers.c    # Grid utilities and character validation
+│   ├── parse_texture.c        # Texture path parsing
+│   ├── parse_color.c          # RGB color parsing
+│   ├── parse_utils.c          # Custom GNL and string utilities
+│   ├── parse_utils_two.c      # Additional parsing helpers
+│   ├── parse_utils_three.c    # More parsing utilities
+│   ├── init.c                 # Player and game initialization
+│   ├── init_mlx.c             # MLX window and texture setup
+│   ├── render.c               # Main rendering loop
+│   ├── render_ray.c           # Ray casting calculations
+│   ├── render_wall.c          # Wall rendering and height calculation
+│   ├── render_texture.c       # Texture mapping
+│   ├── render_pixel.c         # Pixel manipulation
+│   ├── events.c               # Movement and rotation logic
+│   ├── events_two.c           # Key press/release and window handlers
+│   ├── utils.c                # String utilities (strlen, strcmp, etc.)
+│   ├── utils_two.c            # Map utilities (flood fill, grid operations)
+│   ├── utils_three.c          # Additional utilities (strchr)
+│   ├── cleanup.c              # Resource cleanup and exit
+│   └── error.c                # Error handling and messages
 ├── maps/
-│   ├── valid/               # Valid test maps
-│   └── invalid/             # Invalid maps for testing
-├── textures/                # Wall texture files (XPM)
-├── minilibx-linux/          # Graphics library
+│   ├── valid/                 # Valid test maps
+│   │   └── test.cub
+│   └── invalid/               # Invalid maps for testing
+│       ├── missing_tex.cub
+│       └── open_map.cub
+├── textures/                  # Wall texture files (XPM)
+│   ├── north.xpm
+│   ├── south.xpm
+│   ├── east.xpm
+│   └── west.xpm
+├── minilibx-linux/            # Graphics library
+├── obj/                       # Object files (generated)
 ├── Makefile
-└── README.md
+├── README.md
+└── RAYCASTING_EXPLANATION.txt # Detailed technical documentation
 ```
 
 ---
