@@ -6,13 +6,13 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/26 17:30:00 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/26 17:45:58 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/04/08 10:29:32 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/cub3d.h"
 
-t_tex	*pick_texture(t_game *g, double ray_dx, double ray_dy, int side)
+t_tex	*ft_pick_texture(t_game *g, double ray_dx, double ray_dy, int side)
 {
 	if (side == 0)
 	{
@@ -25,7 +25,7 @@ t_tex	*pick_texture(t_game *g, double ray_dx, double ray_dy, int side)
 	return (&g->textures[DIR_NO]);
 }
 
-int	sample_tex(t_tex *tex, int tx, int ty)
+int	ft_sample_tex(t_tex *tex, int tx, int ty)
 {
 	int	offset;
 

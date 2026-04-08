@@ -6,7 +6,7 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/26 17:30:00 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/26 18:11:35 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/04/08 10:36:11 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void	calc_perp_dist(t_wall *wall, t_dda *dda, t_ray *ray, t_player *pl)
 		wall->draw_bot = WIN_H - 1;
 }
 
-void	calc_tex_x(t_wall *wall, t_ray_calc *rc, t_tex *tex)
+void	ft_calc_tex_x(t_wall *wall, t_ray_calc *rc, t_tex *tex)
 {
 	double	wall_x;
 
@@ -50,7 +50,7 @@ void	calc_tex_x(t_wall *wall, t_ray_calc *rc, t_tex *tex)
 		wall->tex_x = tex->w - 1;
 }
 
-void	draw_wall_column(t_mlx *mlx, t_wall *wall, t_tex *tex, int x)
+void	ft_draw_wall_column(t_mlx *mlx, t_wall *wall, t_tex *tex, int x)
 {
 	double	tex_step;
 	double	tex_pos;
@@ -64,7 +64,7 @@ void	draw_wall_column(t_mlx *mlx, t_wall *wall, t_tex *tex, int x)
 	{
 		tex_y = (int)tex_pos & (tex->h - 1);
 		tex_pos += tex_step;
-		put_pixel(mlx, x, y, sample_tex(tex, wall->tex_x, tex_y));
+		ft_put_pixel(mlx, x, y, ft_sample_tex(tex, wall->tex_x, tex_y));
 		y++;
 	}
 }

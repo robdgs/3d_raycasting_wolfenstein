@@ -1,0 +1,536 @@
+================================================================================
+                    CUB3D RAYCASTING IMPLEMENTATION
+                        Technical Explanation
+================================================================================
+
+This document provides an in-depth explanation of the raycasting algorithm 
+and key concepts implemented in this cub3d project. Rather than just listing 
+features, this explanation explores the mathematical foundations, algorithmic 
+choices, and implementation details that make the 3D illusion work.
+
+
+================================================================================
+1. FUNDAMENTAL CONCEPT: RAYCASTING vs. TRUE 3D
+================================================================================
+
+This implementation uses RAYCASTING, not true 3D rendering. Understanding this
+distinction is crucial:
+
+In true 3D rendering, you would:
+- Store walls as 3D geometry (vertices, faces)
+- Project every vertex onto the 2D screen
+- Rasterize triangles/polygons
+- Handle complex depth calculations and sorting
+
+In raycasting:
+- The world is represented as a 2D grid (top-down map)
+- For each vertical column of pixels on screen, you cast ONE ray from the 
+  player's position into the world
+- You find where that ray hits a wall
+- You draw a vertical stripe of the appropriate wall texture at that column
+- The height of the wall stripe depends on the distance to the wall
+
+The genius of raycasting is its simplicity and efficiency. Since walls are 
+perfectly vertical and we only need to find intersections in 2D space, the 
+math becomes much simpler than full 3D rendering. This is why games like 
+Wolfenstein 3D could run smoothly on 1990s hardware.
+
+
+================================================================================
+2. THE CAMERA SYSTEM: Direction and Plane Vectors
+================================================================================
+
+The player's view is defined by TWO 2D vectors:
+
+2.1 Direction Vector (dir_x, dir_y):
+------------------------------------
+This represents where the player is looking. It's a unit (or near-unit) vector
+pointing in the direction the camera faces.
+
+Examples:
+  - Looking North: dir_x = 0,  dir_y = -1  (negative Y in grid coordinates)
+  - Looking East:  dir_x = 1,  dir_y = 0
+  - Looking South: dir_x = 0,  dir_y = 1
+  - Looking West:  dir_x = -1, dir_y = 0
+
+2.2 Camera Plane Vector (plane_x, plane_y):
+-------------------------------------------
+This is perpendicular to the direction vector and represents the camera's 
+field of view (FOV). The length of this vector determines how wide the FOV is.
+
+In this implementation, the plane magnitude is 0.66, which corresponds to 
+approximately a 66-degree FOV (actually closer to 66.4°).
+
+Why perpendicular? Imagine standing and looking straight ahead. Your field of
+view extends from your left peripheral vision to your right. The plane vector
+represents this width of vision, perpendicular to your looking direction.
+
+Mathematical relationship:
+  - If you're facing North (dir = [0, -1]), the plane is East-West ([0.66, 0])
+  - If you're facing East (dir = [1, 0]), the plane is North-South ([0, 0.66])
+  - The plane is always 90° rotated from the direction
+
+Why 0.66 specifically? This value was popularized by Wolfenstein 3D and creates
+a natural-feeling FOV. Smaller values = narrower FOV (telephoto), larger values
+= wider FOV (fisheye).
+
+
+================================================================================
+3. RAY INITIALIZATION: From Screen Space to World Space
+================================================================================
+
+For each vertical column X on the screen (0 to screen width - 1), we need to
+calculate which direction to shoot a ray. This is done in init_ray():
+
+Step 1: Normalize screen X coordinate to range [-1, 1]
+-------------------------------------------------------
+  camera_x = 2.0 * x / screen_width - 1.0
+
+  When x = 0 (leftmost column):    camera_x = -1.0
+  When x = screen_width/2 (center): camera_x =  0.0
+  When x = screen_width-1 (right):  camera_x ≈  1.0
+
+Step 2: Calculate ray direction using camera_x
+-----------------------------------------------
+  ray_dx = dir_x + plane_x * camera_x
+  ray_dy = dir_y + plane_y * camera_x
+
+This is vector addition. Let's understand why this formula works:
+
+- When camera_x = 0 (center of screen):
+  ray direction = direction vector (looking straight ahead)
+
+- When camera_x = -1 (leftmost):
+  ray direction = direction - plane (looking to the left)
+
+- When camera_x = +1 (rightmost):
+  ray direction = direction + plane (looking to the right)
+
+This interpolation across the plane vector creates a smooth sweep of ray 
+directions across the screen, forming the FOV. Each ray fans out from the 
+player's position like spokes of a wheel.
+
+Geometric interpretation:
+  The camera plane acts as a "projection screen" in front of the player. Each
+  screen column corresponds to a point on this virtual plane, and the ray goes
+  from the player's eye through that point.
+
+
+================================================================================
+4. DDA ALGORITHM: Digital Differential Analysis
+================================================================================
+
+Once we have a ray direction, we need to find where it hits a wall. This uses
+the DDA algorithm - an efficient grid traversal method.
+
+4.1 The Problem:
+----------------
+We have:
+  - Player position (px, py) in continuous coordinates
+  - Ray direction (ray_dx, ray_dy)
+  
+We need to:
+  - Check each grid cell the ray passes through
+  - Stop when we hit a wall ('1' in the grid)
+  - Do this efficiently without checking every possible cell
+
+4.2 The DDA Solution:
+---------------------
+Instead of stepping along the ray in small increments (which would be slow and
+imprecise), DDA steps from grid line to grid line. It always moves to the next
+vertical OR horizontal grid boundary, whichever is closer along the ray.
+
+Key DDA variables:
+
+delta_x, delta_y:
+  How far the ray must travel to cross one grid cell in X or Y direction.
+  
+  delta_x = |1 / ray_dx|  (absolute value)
+  delta_y = |1 / ray_dy|
+  
+  Special case: if ray_dx or ray_dy is 0 (ray is perfectly horizontal/vertical),
+  we set the corresponding delta to a very large number (1e30) so it's never
+  chosen.
+
+side_x, side_y:
+  The cumulative distance traveled along the ray to the next X or Y grid line.
+  These are continuously updated as we step through the grid.
+
+step_x, step_y:
+  Which direction to step in the grid: +1 or -1
+  Determined by whether the ray is going positive or negative in each axis.
+
+4.3 Initial Side Distance Calculation:
+--------------------------------------
+When we start, we need to know how far to travel to reach the FIRST grid line:
+
+If ray is going right (ray_dx > 0):
+  side_x = (map_x + 1 - px) * delta_x
+  (distance from player position to the right edge of current cell)
+
+If ray is going left (ray_dx < 0):
+  side_x = (px - map_x) * delta_x
+  (distance from player position to the left edge of current cell)
+
+Same logic applies for Y direction.
+
+4.4 The DDA Loop (perform_dda):
+-------------------------------
+Now comes the actual traversal:
+
+while (not hit wall):
+    if (side_x < side_y):
+        # X-boundary is closer
+        side_x += delta_x        # Advance to next X grid line
+        map_x += step_x          # Move to next cell in X
+        side = 0                 # Remember we crossed an X boundary
+    else:
+        # Y-boundary is closer
+        side_y += delta_y        # Advance to next Y grid line
+        map_y += step_y          # Move to next cell in Y
+        side = 1                 # Remember we crossed a Y boundary
+    
+    if (current cell is wall):
+        break
+
+The 'side' variable (0 or 1) tells us whether we hit a vertical wall (X-side)
+or horizontal wall (Y-side). This is crucial for choosing the correct texture
+and for lighting effects.
+
+Why this works:
+  Think of side_x and side_y as "timers" counting how far the ray has traveled.
+  We always choose to advance the smaller timer (closer boundary), then add
+  the delta to that timer. This ensures we hit every grid cell the ray passes
+  through, in the correct order, without redundancy.
+
+
+================================================================================
+5. PERPENDICULAR DISTANCE CALCULATION: Avoiding the Fisheye Effect
+================================================================================
+
+Once we've hit a wall, we need to know how far away it is. But there's a trap!
+
+5.1 The Fisheye Problem:
+------------------------
+If we simply use the Euclidean distance from player to wall:
+  distance = sqrt((wall_x - px)² + (wall_y - py)²)
+
+We get a fisheye distortion. Why? Because rays at the edges of the screen
+travel at an angle and cover MORE distance to hit walls directly in front of
+the player. This makes walls appear curved inward.
+
+5.2 The Solution: Perpendicular Distance:
+-----------------------------------------
+Instead, we calculate the perpendicular distance - the distance measured 
+perpendicular to the camera plane. This is the distance "as the player sees it"
+in the projected view.
+
+The formula depends on which side we hit:
+
+If we hit a vertical wall (side == 0):
+  perp_dist = (map_x - px + (1 - step_x) / 2) / ray_dx
+
+If we hit a horizontal wall (side == 1):
+  perp_dist = (map_y - py + (1 - step_y) / 2) / ray_dy
+
+Breaking down the formula:
+  - (map_x - px): How many cells away is the wall?
+  - (1 - step_x) / 2: Adjustment to get to the correct edge of the cell
+      - If step_x = 1 (going right): adds 0 (use left edge of wall cell)
+      - If step_x = -1 (going left): adds 1 (use right edge of wall cell)
+  - Division by ray_dx: Projects this distance onto the ray direction
+
+The perpendicular distance gives us consistent wall sizes across the screen,
+eliminating the fisheye effect.
+
+5.3 Wall Height Calculation:
+-----------------------------
+Once we have perpendicular distance, the wall's screen height is:
+
+  line_height = screen_height / perp_dist
+
+Closer walls (smaller perp_dist) = taller on screen
+Farther walls (larger perp_dist) = shorter on screen
+
+This creates the perspective effect. The division implements perspective
+projection in its simplest form.
+
+
+================================================================================
+6. TEXTURE MAPPING: From Wall Space to Texture Space
+================================================================================
+
+Now we need to determine WHICH texture to use and WHERE on that texture to
+sample from.
+
+6.1 Texture Selection:
+----------------------
+The texture depends on which side of the wall we hit:
+
+Vertical walls (side == 0):
+  - If ray_dx > 0: Hit from the west, show EAST texture
+  - If ray_dx < 0: Hit from the east, show WEST texture
+
+Horizontal walls (side == 1):
+  - If ray_dy > 0: Hit from the north, show SOUTH texture
+  - If ray_dy < 0: Hit from the south, show NORTH texture
+
+This ensures each wall face shows its appropriate texture.
+
+6.2 Calculating Texture X Coordinate:
+-------------------------------------
+We need to know WHERE along the wall we hit. This gives us the horizontal
+texture coordinate (tex_x).
+
+First, find the exact impact point:
+
+  If vertical wall:   wall_x = py + perp_dist * ray_dy
+  If horizontal wall: wall_x = px + perp_dist * ray_dx
+
+This gives us the world position where the ray hit. We then:
+  1. Take fractional part: wall_x = wall_x - floor(wall_x)
+  2. Multiply by texture width: tex_x = wall_x * texture_width
+
+The fractional part ensures we get a value in [0,1), representing position
+within the wall cell. Multiplying by texture width converts this to pixel
+coordinates in the texture.
+
+Texture Flipping:
+  Depending on ray direction, we may need to flip the texture horizontally
+  to maintain consistent mapping:
+  
+  if ((side == 0 && ray_dx < 0) || (side == 1 && ray_dy > 0)):
+      tex_x = texture_width - tex_x - 1
+
+This ensures textures always face the same way regardless of viewing angle.
+
+6.3 Vertical Texture Mapping (draw_wall_column):
+------------------------------------------------
+For the Y coordinate, we need to map the screen Y position to texture Y:
+
+  tex_step = texture_height / line_height
+
+This determines how much we advance through the texture for each screen pixel.
+
+We start at the top of the wall slice:
+  tex_pos = (draw_top - screen_height/2 + line_height/2) * tex_step
+
+This calculation:
+  - Centers the texture on the wall
+  - Accounts for walls that are clipped at top/bottom of screen
+  - Scales the texture to fit the wall height
+
+For each pixel from draw_top to draw_bot:
+  1. Calculate tex_y = (int)tex_pos
+  2. Sample the texture color at (tex_x, tex_y)
+  3. Draw that color at screen position (x, y)
+  4. Advance: tex_pos += tex_step
+
+The masking operation (tex_y & (texture_height - 1)) assumes texture height
+is a power of 2 and provides efficient wrapping/clamping.
+
+
+================================================================================
+7. MOVEMENT AND ROTATION SYSTEM
+================================================================================
+
+7.1 Forward/Backward Movement:
+------------------------------
+Moving forward means moving in the direction the player is facing:
+
+  new_px = px + dir_x * MOVE_SPEED
+  new_py = py + dir_y * MOVE_SPEED
+
+Moving backward is simply negating the direction vector:
+
+  new_px = px - dir_x * MOVE_SPEED
+  new_py = py - dir_y * MOVE_SPEED
+
+Before applying the movement, we check if the new position is a wall:
+  - Convert to grid coordinates: (int)new_px, (int)new_py
+  - Check if grid[y][x] == '1'
+  - Only move if the destination is not a wall
+
+X and Y components are checked separately, allowing "sliding" along walls.
+
+7.2 Strafing (Left/Right Movement):
+-----------------------------------
+Strafing means moving perpendicular to the viewing direction. The perpendicular
+vector to (dir_x, dir_y) is (dir_y, -dir_x) or (-dir_y, dir_x).
+
+Move left (strafe toward camera's left side):
+  new_px = px + dir_y * MOVE_SPEED
+  new_py = py - dir_x * MOVE_SPEED
+
+Move right (strafe toward camera's right side):
+  new_px = px - dir_y * MOVE_SPEED
+  new_py = py + dir_x * MOVE_SPEED
+
+This uses the mathematical property that rotating a 2D vector by 90° swaps
+components and negates one: (x, y) → (y, -x) or (-y, x).
+
+7.3 Rotation:
+-------------
+Rotation transforms both the direction vector AND the plane vector using the
+2D rotation matrix:
+
+  | cos(θ)  -sin(θ) |
+  | sin(θ)   cos(θ) |
+
+For a vector (x, y), rotation by angle θ gives:
+  new_x = x * cos(θ) - y * sin(θ)
+  new_y = x * sin(θ) + y * cos(θ)
+
+Both vectors are rotated by the same angle to maintain their perpendicular
+relationship and preserve the FOV.
+
+ROT_SPEED is the angle in radians rotated per frame when turning.
+MOVE_SPD is in grid units per frame.
+
+
+================================================================================
+8. COMPLETE RENDERING PIPELINE
+================================================================================
+
+Here's the full frame rendering sequence:
+
+1. BACKGROUND RENDERING:
+   - Fill top half of screen with ceiling color (RGB from config)
+   - Fill bottom half of screen with floor color (RGB from config)
+
+2. FOR EACH SCREEN COLUMN (x = 0 to screen_width - 1):
+   
+   a. Initialize ray for this column
+      - Calculate camera_x = 2*x/width - 1
+      - Compute ray direction: (dir_x + plane_x*camera_x, dir_y + plane_y*camera_x)
+   
+   b. Setup DDA
+      - Calculate delta_x and delta_y (distance to cross one cell)
+      - Determine initial side_x and side_y (distance to first grid line)
+      - Set step_x and step_y (direction to advance in grid)
+   
+   c. Perform DDA traversal
+      - Step through grid cells
+      - Stop when hitting a wall
+      - Track which side was hit (vertical or horizontal)
+   
+   d. Calculate wall distance and height
+      - Compute perpendicular distance
+      - Derive wall height = screen_height / perp_dist
+      - Determine draw_top and draw_bot (where to start/stop drawing)
+   
+   e. Select and map texture
+      - Choose texture based on wall side and ray direction
+      - Calculate texture_x from exact wall hit position
+      - Calculate texture_y incrementally for each screen pixel
+   
+   f. Draw the wall column
+      - For each pixel from draw_top to draw_bot
+      - Sample texture at (texture_x, texture_y)
+      - Put pixel on screen
+
+3. DISPLAY:
+   - Copy the complete frame buffer to the window
+
+
+================================================================================
+9. OPTIMIZATION TECHNIQUES
+================================================================================
+
+9.1 Integer Arithmetic:
+  Where possible, the implementation uses integer operations. Array indexing,
+  pixel addressing, and texture sampling all use integers for speed.
+
+9.2 Table-Free Trigonometry:
+  After initial setup, no sin/cos calls are needed during rendering. Rotation
+  is pre-computed when needed, and ray directions are calculated algebraically.
+
+9.3 Grid-Based Collision:
+  Instead of complex collision geometry, the grid system allows O(1) collision
+  checks - just index into the grid array.
+
+9.4 Column-Based Rendering:
+  Processing one screen column at a time keeps memory access local and cache-
+  friendly. Each column is independent, making the algorithm parallelizable
+  (though not implemented here).
+
+9.5 Avoiding Division:
+  Delta_x and delta_y are reciprocals (1/ray_dx), computed once and reused
+  with multiplication rather than repeated division.
+
+
+================================================================================
+10. LIMITATIONS OF THIS RAYCASTING APPROACH
+================================================================================
+
+Understanding limitations helps appreciate the design:
+
+✗ No vertical looking up/down
+  - The camera is fixed at a constant height
+  - All walls extend floor-to-ceiling
+  
+✗ No floor/ceiling textures
+  - Only solid colors for floor and ceiling (though texturing is possible)
+  
+✗ No height variation
+  - All walls are the same height; no stairs, ramps, or multi-level areas
+  
+✗ No diagonal walls
+  - Walls must align to the grid; no arbitrary angles
+  
+✗ No transparency
+  - All walls are opaque
+  
+✗ No lighting variation
+  - No distance fog, shadows, or dynamic lighting (could be added)
+
+These limitations are inherent to the raycasting technique, not implementation
+flaws. They're trade-offs for the algorithm's simplicity and speed.
+
+
+================================================================================
+11. MATHEMATICAL FOUNDATIONS SUMMARY
+================================================================================
+
+Key mathematical concepts used:
+
+• Vector arithmetic: Direction and plane vectors, ray directions
+• 2D rotation matrices: For turning the camera
+• Linear interpolation: Spreading rays across the FOV
+• Projective geometry: Converting 3D distances to screen heights
+• Grid traversal: DDA algorithm for efficient ray-grid intersection
+• Parametric lines: Rays represented as origin + t*direction
+• Texture mapping: Mapping 2D texture coordinates to screen space
+• Trigonometry: Initial camera setup, rotation calculations
+
+
+================================================================================
+12. HISTORICAL CONTEXT
+================================================================================
+
+This raycasting technique was pioneered by id Software:
+- Early use: Hovertank 3D (1991)
+- Perfected in: Wolfenstein 3D (1992)
+- Enhanced in: Doom (1993, with height variation)
+
+Before modern GPUs, this was the only practical way to achieve real-time 3D
+on consumer hardware. Understanding raycasting provides insight into the
+evolution of game technology and the creative solutions to hardware limitations.
+
+
+================================================================================
+CONCLUSION
+================================================================================
+
+This cub3d implementation demonstrates classical raycasting in a clean,
+educational form. The code separates concerns well:
+- Parsing and initialization (parse_*.c, init.c)
+- Core raycasting algorithm (render.c)
+- Player control (events.c)
+
+The algorithm's elegance lies in its simplicity: cast rays, find walls,
+draw columns. Yet this simple process creates a convincing 3D world from
+a 2D grid. It's a perfect example of how mathematical insight and clever
+algorithms can achieve remarkable results with limited resources.
+
+================================================================================

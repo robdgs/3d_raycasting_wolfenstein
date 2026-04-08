@@ -6,7 +6,7 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 21:26:08 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/26 18:33:00 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/04/08 10:29:18 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -275,23 +275,23 @@ int			ft_is_tile(char ch);
 char		*ft_strchr(const char *s, int c);
 
 /* ---- src/render_pixel.c ----------------------------------------------- */
-void		put_pixel(t_mlx *m, int x, int y, int color);
-int			rgb(int r, int g, int b);
-void		draw_background(t_game *g);
+void		ft_put_pixel(t_mlx *m, int x, int y, int color);
+int			ft_rgb(int r, int g, int b);
+void		ft_draw_background(t_game *g);
 
 /* ---- src/render_texture.c --------------------------------------------- */
-t_tex		*pick_texture(t_game *g, double ray_dx, double ray_dy, int side);
-int			sample_tex(t_tex *tex, int tx, int ty);
+t_tex		*ft_pick_texture(t_game *g, double ray_dx, double ray_dy, int side);
+int			ft_sample_tex(t_tex *tex, int tx, int ty);
 
 /* ---- src/render_ray.c ------------------------------------------------- */
-void		init_ray(t_ray *ray, t_player *pl, int x);
-void		init_dda_deltas(t_dda *dda, t_ray *ray, t_player *pl);
-void		init_dda_steps(t_dda *dda, t_ray *ray, t_player *pl);
-void		perform_dda(t_dda *dda, t_scene *sc);
+void		ft_init_ray(t_ray *ray, t_player *pl, int x);
+void		ft_init_dda_deltas(t_dda *dda, t_ray *ray, t_player *pl);
+void		ft_init_dda_steps(t_dda *dda, t_ray *ray, t_player *pl);
+void		ft_perform_dda(t_dda *dda, t_scene *sc);
 
 /* ---- src/render_wall.c ------------------------------------------------ */
 void		calc_perp_dist(t_wall *wall, t_dda *dda, t_ray *ray, t_player *pl);
-void		calc_tex_x(t_wall *wall, t_ray_calc *rc, t_tex *tex);
-void		draw_wall_column(t_mlx *mlx, t_wall *wall, t_tex *tex, int x);
+void		ft_calc_tex_x(t_wall *wall, t_ray_calc *rc, t_tex *tex);
+void		ft_draw_wall_column(t_mlx *mlx, t_wall *wall, t_tex *tex, int x);
 
 #endif

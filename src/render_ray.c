@@ -6,13 +6,13 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/26 17:30:00 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/26 17:53:48 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/04/08 11:06:58 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/cub3d.h"
 
-void	init_ray(t_ray *ray, t_player *pl, int x)
+void	ft_init_ray(t_ray *ray, t_player *pl, int x)
 {
 	double	cam_x;
 
@@ -21,7 +21,7 @@ void	init_ray(t_ray *ray, t_player *pl, int x)
 	ray->dy = pl->dir_y + pl->plane_y * cam_x;
 }
 
-void	init_dda_deltas(t_dda *dda, t_ray *ray, t_player *pl)
+void	ft_init_dda_deltas(t_dda *dda, t_ray *ray, t_player *pl)
 {
 	dda->map_x = (int)pl->px;
 	dda->map_y = (int)pl->py;
@@ -35,7 +35,11 @@ void	init_dda_deltas(t_dda *dda, t_ray *ray, t_player *pl)
 		dda->delta_y = fabs(1.0 / ray->dy);
 }
 
-void	init_dda_steps(t_dda *dda, t_ray *ray, t_player *pl)
+//Se il raggio va a destra (ray_dx > 0): side_x = (map_x + 1 − px) × delta_x:
+//distanza al bordo destro della cella 
+//Se il raggio va a sinistra (ray_dx < 0): side_x = (px − map_x) × delta_x:
+//distanza al bordo sinistro Stessa logica per Y.
+void	ft_init_dda_steps(t_dda *dda, t_ray *ray, t_player *pl)
 {
 	if (ray->dx < 0)
 	{
@@ -59,7 +63,7 @@ void	init_dda_steps(t_dda *dda, t_ray *ray, t_player *pl)
 	}
 }
 
-void	perform_dda(t_dda *dda, t_scene *sc)
+void	ft_perform_dda(t_dda *dda, t_scene *sc)
 {
 	double	epsilon;
 

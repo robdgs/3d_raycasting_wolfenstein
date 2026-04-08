@@ -6,7 +6,7 @@
 /*   By: rd-agost <rd-agost@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/20 21:50:58 by rd-agost          #+#    #+#             */
-/*   Updated: 2026/02/26 18:11:35 by rd-agost         ###   ########.fr       */
+/*   Updated: 2026/04/08 11:08:54 by rd-agost         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,24 +20,24 @@ static void	cast_column(t_game *g, int x)
 	t_tex		*tex;
 	t_ray_calc	rc;
 
-	init_ray(&ray, &g->player, x);
-	init_dda_deltas(&dda, &ray, &g->player);
-	init_dda_steps(&dda, &ray, &g->player);
-	perform_dda(&dda, &g->scene);
+	ft_init_ray(&ray, &g->player, x);
+	ft_init_dda_deltas(&dda, &ray, &g->player);
+	ft_init_dda_steps(&dda, &ray, &g->player);
+	ft_perform_dda(&dda, &g->scene);
 	calc_perp_dist(&wall, &dda, &ray, &g->player);
-	tex = pick_texture(g, ray.dx, ray.dy, dda.side);
+	tex = ft_pick_texture(g, ray.dx, ray.dy, dda.side);
 	rc.dda = &dda;
 	rc.ray = &ray;
 	rc.pl = &g->player;
-	calc_tex_x(&wall, &rc, tex);
-	draw_wall_column(&g->mlx, &wall, tex, x);
+	ft_calc_tex_x(&wall, &rc, tex);
+	ft_draw_wall_column(&g->mlx, &wall, tex, x);
 }
 
 void	ft_render_frame(t_game *g)
 {
 	int	x;
 
-	draw_background(g);
+	ft_draw_background(g);
 	x = 0;
 	while (x < WIN_W)
 	{
